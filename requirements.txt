@@ -1,3 +1,4 @@
-plurk-oauth==0.5.0
-feedparser==5.2.0
+-e git+https://github.com/i-kiwamu/python3-oauth2.git#egg=oauth2
+-e git+https://github.com/elleryq/plurk-oauth.git#egg=plurk-oauth
+feedparser==5.2.1
 
