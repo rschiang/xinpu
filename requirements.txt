@@ -1,4 +1,4 @@
 -e git+https://github.com/i-kiwamu/python3-oauth2.git#egg=oauth2
 -e git+https://github.com/elleryq/plurk-oauth.git#egg=plurk-oauth
 feedparser==5.2.1
-
+bleach==1.4.2

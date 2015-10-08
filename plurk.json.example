@@ -1,0 +1,6 @@
+{
+    "CONSUMER_KEY": "<application_key>",
+    "CONSUMER_SECRET": "<application_secret>",
+    "ACCESS_TOKEN": "<session_token>",
+    "ACCESS_TOKEN_SECRET": "<session_token_secret>"
+}

@@ -1,0 +1,34 @@
+{
+    "version": "1",
+    "username": "sinvun",
+    "format": "【{site}】{url} ({title})\n{summary}",
+    "throttle": 60,
+    "feeds": [
+        {
+            "name": "中央社",
+            "url": "http://feeds.feedburner.com/cnaFirstNews",
+            "interval": 300,
+            "options": {
+                "link": "follow",
+                "extract": ["image"],
+                "content_filter": "(^（中央社[^）]+）|\\[\\[[^\\]]+\\]\\])"
+            }
+        },
+        {
+            "name": "科技新報",
+            "url": "http://technews.tw/feed/",
+            "interval": 600,
+            "options": {
+                "extract": ["image", "description"]
+            }
+        },
+        {
+            "name": "NPOst",
+            "url": "http://npost.tw/feed",
+            "interval": 14400,
+            "options": {
+                "extract": ["image", "description"]
+            }
+        }
+    ]
+}
