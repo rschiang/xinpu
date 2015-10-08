@@ -3,6 +3,7 @@
     "username": "sinvun",
     "format": "【{site}】{url} ({title})\n{summary}",
     "throttle": 60,
+    "backtrack": 7200,
     "feeds": [
         {
             "name": "中央社",
