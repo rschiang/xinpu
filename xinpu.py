@@ -39,11 +39,11 @@ class Application(object):
 
         return Application(config=Config(**entity))
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':  # Running from console
     app = Application.initialize()
     app.start()
-
     try:
         sys.stdin.read()    # Block until any key pressed
     finally:
-        app.stop()
+        app.stop()          # Gracefully stop the application
