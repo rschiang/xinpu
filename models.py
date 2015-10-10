@@ -16,7 +16,7 @@ class Feed(object):
         self.name = kwargs.get('name')
         self.url = kwargs.get('url')
         self.interval = kwargs.get('interval', 0)
-        self.options = kwargs.get('options')
+        self.options = kwargs.get('options', {})
         self.last_updated = config.last_updated
 
     def needs_update(self):

@@ -30,6 +30,19 @@
             "options": {
                 "extract": ["image", "description"]
             }
+        },
+        {
+            "name": "花火",
+            "url": "http://ntustudents.org/sparks/?feed=rss2",
+            "interval": 43200,
+            "options": {
+                "extract": ["link"]
+            }
+        },
+        {
+            "name": "創用CC",
+            "url": "http://creativecommons.tw/feed/blog",
+            "interval": 43200
         }
     ]
 }
