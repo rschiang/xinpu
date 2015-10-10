@@ -11,4 +11,6 @@ class FeedCrawler(threading.Thread):
             for feed in config.feeds:
                 if not feed.needs_update():
                     continue
+
                 # Fetch new feed
+                pass

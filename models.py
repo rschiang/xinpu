@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 class Config(object):
     def __init__(self, **kwargs):
         self.username = kwargs.get('username')
+        self.lang = kwargs.get('lang', 'tr_ch')
         self.format = kwargs.get('format', '({site}) {url} ({title}): {summary}')
         self.throttle = kwargs.get('throttle', 5)
         self.backtrack = kwargs.get('backtrack', 0)

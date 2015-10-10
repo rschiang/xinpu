@@ -1,4 +1,5 @@
 import threading
+from plurk_oauth import PlurkAPI
 
 class ContentPoster(threading.Thread):
     def __init__(self, app):
@@ -6,6 +7,7 @@ class ContentPoster(threading.Thread):
         self.app = app
         self.daemon = True
         self.queue = Queue()
+        self.api = PlurkAPI.fromfile('plurk.json')
 
     def run(self):
         while self.app.running():
@@ -13,4 +15,9 @@ class ContentPoster(threading.Thread):
                 continue
 
             item = self.queue.get()
-            # Post item
+            content = self.app.config.format.format(**item)
+            result = plurk.callAPI('/APP/Timeline/plurkAdd', {
+                'qualifier': ':',
+                'content': content,
+                'lang': item.get('lang', self.app.config.lang),
+            })
