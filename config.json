@@ -12,7 +12,7 @@
             "options": {
                 "link": "follow",
                 "extract": ["image"],
-                "content_filter": "(^（中央社[^）]+）|\\[\\[[^\\]]+\\]\\])"
+                "content_filter": "(^（中央社[^）]+）|\\[\\[[^\\]]+\\]\\].+)"
             }
         },
         {
