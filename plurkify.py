@@ -2,7 +2,7 @@ import bleach
 import re
 
 ALLOWED_TAGS = (
-    'a', 'b', 'br', 'code', 'del', 'em', 'i', 'img', 's', 'strike', 'strong', 'u',
+    'a', 'b', 'br', 'code', 'del', 'em', 'i', 'img', 'p', 's', 'strike', 'strong', 'u',
 )
 
 ALLOWED_ATTRIBUTES = {
@@ -16,6 +16,15 @@ IMAGE_LINKIFIER = re.compile(r'\<img(\s*src=[\'"]?(?P<url>[^\'"\>]+)[\'"]?\s*|\s
 
 TAG_GRINDER = re.compile(r'\<(?P<tag>[^\>]+?)\>')
 
+FORMATTERS = {
+    '**': ('b', 'strong'),
+    '*': ('i', 'em'),
+    '--': ('del', 's', 'strike'),
+    '`': ('code',),
+    '__': ('u',),
+    '\n': ('br', 'p'),
+}
+
 def linkify(text):
     return LINKIFIER.sub(r'\g<url> (\g<title>)', text)
 
@@ -25,20 +34,11 @@ def linkify_image(text):
 def reformat(text):
     def formatter(match):
         tag = match.group('tag').lower().strip('/ ')
-        if tag in ('b', 'strong'):
-            return '**'
-        elif tag in ('i', 'em'):
-            return '*'
-        elif tag in ('del', 's', 'strike'):
-            return '--'
-        elif tag == 'code':
-            return '`'
-        elif tag == 'u':
-            return '__'
-        elif tag == 'br':
-            return '\n'
-        else:
-            return ''
+        for char, tags in FORMATTERS.items():
+            if tag in tags:
+                return char
+        return ''
+    return TAG_GRINDER.sub(formatter, text).strip()
 
 def plurkify_text(text):
     raw_text = bleach.clean(text, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
