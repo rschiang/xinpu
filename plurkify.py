@@ -40,7 +40,7 @@ class PlurkifyHTMLParser(HTMLParser):
         self.buffer = StringIO()
 
         # Post-process
-        return self.remove_spaces(result)
+        return self.remove_spaces(result).strip()
 
     # Internal functions
 
@@ -56,6 +56,9 @@ class PlurkifyHTMLParser(HTMLParser):
         # Append formatter prefix
         if tag in FORMATTERS:
             self.write_buffer(FORMATTERS[tag])
+        elif tag == 'a':
+            attributes = dict(attrs)
+            self.current_url = attributes.get('href')
 
     def handle_data(self, data):
         if not self.is_in_raw_tag():
