@@ -11,11 +11,11 @@ ALLOWED_ATTRIBUTES = {
     'img': ['src', 'alt'],
 }
 
-SCRIPTINATOR = re.compile(r'\<script[^\>]*\>.*?\</script\>', re.IGNORECASE | re.DOTALL)
+SCRIPTINATOR = re.compile(r'\<(?P<tag>script|style)[^\>]*\>.*?\</(?P=tag)\>', re.IGNORECASE | re.DOTALL)
 
 WHITESPACEINATOR = re.compile(r'\s{2,}')
 
-LINKIFIER = re.compile(r'\<a href=[\'"]?(?P<url>[^\'"\>]+)[\'"]?\>(?P<title>[^\>]+?)\</a\>', re.IGNORECASE)
+LINKIFIER = re.compile(r'\<a href=[\'"]?(?P<url>[^\'"\>]+)[\'"]?\>\s*(?P<title>[^\>]*?)\s*\</a\>', re.IGNORECASE)
 
 IMAGE_LINKIFIER = re.compile(r'\<img(\s*src=[\'"]?(?P<url>[^\'"\>]+)[\'"]?\s*|\s*alt=[\'"]?(?P<title>[^\'"\>]+)[\'"]?\s*)*/?\>', re.IGNORECASE)
 
@@ -38,11 +38,20 @@ def remove_spaces(text):
         return '\n' if '\n' in match.group(0) else ' '
     return WHITESPACEINATOR.sub(formatter, text)
 
+def link_formatter(match):
+    url, title = match.group('url', 'title')
+    if title:
+        if url == '#':
+            return title
+        else:
+            return '{url} ({title})'.format(url=url, title=title.strip())
+    return url.strip()
+
 def linkify(text):
-    return LINKIFIER.sub(r'\g<url> (\g<title>)', text)
+    return LINKIFIER.sub(link_formatter, text)
 
 def linkify_image(text):
-    return IMAGE_LINKIFIER.sub(r'\g<url> (\g<title>)', text)
+    return IMAGE_LINKIFIER.sub(link_formatter, text)
 
 def reformat(text):
     def formatter(match):
