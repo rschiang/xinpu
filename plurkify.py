@@ -1,71 +1,136 @@
-import bleach
-import html
+from html.parser import HTMLParser
+from io import StringIO
 import re
 
-ALLOWED_TAGS = (
-    'a', 'b', 'br', 'code', 'del', 'em', 'i', 'img', 'p', 's', 'strike', 'strong', 'u',
-)
+class PlurkifyHTMLParser(HTMLParser):
+    def __init__(self):
+        super(self, HTMLParser).__init__(convert_charrefs=True)
+        self.stack = []
+        self.buffer = StringIO()
+        self.current_url = None
+        self.sub_buffer = StringIO()
 
-ALLOWED_ATTRIBUTES = {
-    'a': ['href'],
-    'img': ['src', 'alt'],
-}
+    # Public functions
+    def convert(text):
+        self.feed(text)
 
-SCRIPTINATOR = re.compile(r'\<(?P<tag>script|style)[^\>]*\>.*?\</(?P=tag)\>', re.IGNORECASE | re.DOTALL)
+        # Close all remaining tags
+        while self.stack:
+            top = self.stack.pop()
+            self.close_tag(tag)
 
-WHITESPACEINATOR = re.compile(r'\s{2,}')
+        # Get value and reset buffer
+        result = self.buffer.getvalue()
+        self.buffer.close()
+        self.buffer = StringIO()
 
-LINKIFIER = re.compile(r'\<a href=[\'"]?(?P<url>[^\'"\>]+)[\'"]?\>\s*(?P<title>[^\>]*?)\s*\</a\>', re.IGNORECASE)
+        # Post-process
+        return remove_spaces(result)
 
-IMAGE_LINKIFIER = re.compile(r'\<img(\s*src=[\'"]?(?P<url>[^\'"\>]+)[\'"]?\s*|\s*alt=[\'"]?(?P<title>[^\'"\>]+)[\'"]?\s*)*/?\>', re.IGNORECASE)
+    # Constants
 
-TAG_GRINDER = re.compile(r'\<(?P<tag>[^\>]+?)\>')
+    WHITESPACEINATOR = re.compile(r'\s{2,}')
 
-FORMATTERS = {
-    '**': ('b', 'strong'),
-    '*': ('i', 'em'),
-    '--': ('del', 's', 'strike'),
-    '`': ('code',),
-    '__': ('u',),
-    '\n': ('br', 'p'),
-}
+    FORMATTERS = {
+        'b': '**',
+        'code': '`',
+        'del': '--',
+        'em': '*',
+        'i': '*',
+        'p': '\n',
+        's': '--',
+        'strike': '--',
+        'strong': '**',
+        'u': '__',
+    }
 
-def remove_scripts(text):
-    return SCRIPTINATOR.sub('', text)
+    # Internal functions
 
-def remove_spaces(text):
-    def formatter(match):
-        return '\n' if '\n' in match.group(0) else ' '
-    return WHITESPACEINATOR.sub(formatter, text)
+    def handle_starttag(self, tag, attrs):
+        # Skip line breaks
+        if tag == 'br':
+            self.write_buffer('\n')
+            return
 
-def link_formatter(match):
-    url, title = match.group('url', 'title')
-    if title:
-        if url == '#':
-            return title
-        else:
-            return '{url} ({title})'.format(url=url, title=title.strip())
-    return url.strip()
+        # Push current tag to stack
+        self.stack.append(tag)
 
-def linkify(text):
-    return LINKIFIER.sub(link_formatter, text)
+        # Append formatter prefix
+        if tag in FORMATTERS:
+            self.write_buffer(FORMATTERS[tag])
 
-def linkify_image(text):
-    return IMAGE_LINKIFIER.sub(link_formatter, text)
+    def handle_data(self, data):
+        if tag not in ('style', 'script'):
+            self.write_buffer(data)
 
-def reformat(text):
-    def formatter(match):
-        tag = match.group('tag').lower().strip('/ ')
-        for char, tags in FORMATTERS.items():
-            if tag in tags:
-                return char
-        return ''
-    return TAG_GRINDER.sub(formatter, text).strip()
+    def handle_endtag(self, tag):
+        # Close tag if tag is not in stack
+        if tag not in self.stack:
+            self.close_tag(tag)
+            return
 
-def clean_tags(text):
-    return bleach.clean(text, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+        # Properly close tag if misplaced
+        while self.stack:
+            # Close the current tag on stack
+            top = self.stack.pop()
+            self.close_tag(top)
 
-def plurkify_text(text):
-    for process in (remove_scripts, clean_tags, linkify, linkify_image, reformat, html.unescape, remove_spaces):
-        text = process(text)
-    return text
+            # All remaining tags popped
+            if top == tag:
+                break
+
+    def handle_startendtag(self, tag, attrs):
+        if tag == 'br':
+            self.write_buffer('\n')
+        elif tag == 'img':
+            attributes = dict(attrs)
+            url = attributes.get('src', '').strip()
+            title = attributes.get('alt', '').strip()
+
+            # Note that we write to buffer directly
+            # since it's impossible to place image inside hyperlink on Plurk
+            if url:
+                self.buffer.write(url)
+            if title:
+                self.buffer.write(' ({})'.format(title))
+
+    # Utilities function
+
+    def write_buffer(self, text):
+        if 'a' in self.stack:
+            self.sub_buffer.write(text)
+        else
+            self.buffer.write(text)
+
+    def is_valid_url(self, url):
+        for prefix in ('#', 'javascript'):
+            if url.startswith(prefix):
+                return False
+        return True
+
+    def close_tag(self, tag):
+        # Append formatter postfix
+        if top in FORMATTERS:
+            self.buffer.write(FORMATTER)
+        elif tag == 'a':
+            url = self.current_url
+            title = self.sub_buffer.getvalue().trim()
+
+            if url and self.is_valid_url(url):
+                if title:
+                    self.buffer.write('{} ({})'.format(url, title))
+                else:
+                    self.buffer.write(url)  # URL only
+            else:
+                self.write(title)   # Plain text
+
+            # Reset sub-buffer
+            self.current_url = None
+            self.sub_buffer.close()
+            self.sub_buffer = StringIO()
+
+    @staticmethod
+    def remove_spaces(text):
+        def formatter(match):
+            return '\n' if '\n' in match.group(0) else ' '
+        return WHITESPACEINATOR.sub(formatter, text)

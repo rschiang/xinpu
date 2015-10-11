@@ -1,8 +1,9 @@
 from datetime import datetime
-from plurkify import plurkify_text
+from plurkify import PlurkifyHTMLParser
 import dateutil
-import threading
 import feedparser
+import re
+import threading
 
 class FeedCrawler(threading.Thread):
     def __init__(self, app):
@@ -12,6 +13,7 @@ class FeedCrawler(threading.Thread):
 
     def run(self):
         while self.app.running():
+            plurkifier = PlurkifyHTMLParser()
             entries = []
             for feed in config.feeds:
                 if not feed.needs_update():
@@ -19,6 +21,7 @@ class FeedCrawler(threading.Thread):
 
                 # Fetch new feed
                 news = feedparser.parse(feed.url)
+                extract_options = feed.options.get('extract', [])
 
                 # Filter out new items
                 for entry in news.entries:
@@ -30,11 +33,22 @@ class FeedCrawler(threading.Thread):
                         'site': feed.name,
                         'title': entry.title,
                         'url': entry.link,
-                        'summary': plurkify_text(entry.description),
                         'date': published,
                     }
 
-                    # TODO: Extract contents from site
+                    if 'description' not in extract_options:
+                        summary = plurkifier.convert(entry.description)
+
+                        # Pass through content filter if needed
+                        if 'content_filter' in feed.options:
+                            summary = re.sub(feed.options['content_filter'], '', summary)
+
+                        item['summary'] = summary.strip()
+
+                        # TODO: Extract contents from site
+                    if 'follow' in feed.options or extract_options:
+                        pass
+
                     entries.append(item)
 
             # After aggregating all feeds, sort them before post
