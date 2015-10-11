@@ -2,16 +2,31 @@ from html.parser import HTMLParser
 from io import StringIO
 import re
 
+WHITESPACEINATOR = re.compile(r'\s{2,}')
+
+FORMATTERS = {
+    'b': '**',
+    'code': '`',
+    'del': '--',
+    'em': '*',
+    'i': '*',
+    'p': '\n',
+    's': '--',
+    'strike': '--',
+    'strong': '**',
+    'u': '__',
+}
+
 class PlurkifyHTMLParser(HTMLParser):
     def __init__(self):
-        super(self, HTMLParser).__init__(convert_charrefs=True)
+        super().__init__(convert_charrefs=True)
         self.stack = []
         self.buffer = StringIO()
         self.current_url = None
         self.sub_buffer = StringIO()
 
     # Public functions
-    def convert(text):
+    def convert(self, text):
         self.feed(text)
 
         # Close all remaining tags
@@ -25,24 +40,7 @@ class PlurkifyHTMLParser(HTMLParser):
         self.buffer = StringIO()
 
         # Post-process
-        return remove_spaces(result)
-
-    # Constants
-
-    WHITESPACEINATOR = re.compile(r'\s{2,}')
-
-    FORMATTERS = {
-        'b': '**',
-        'code': '`',
-        'del': '--',
-        'em': '*',
-        'i': '*',
-        'p': '\n',
-        's': '--',
-        'strike': '--',
-        'strong': '**',
-        'u': '__',
-    }
+        return self.remove_spaces(result)
 
     # Internal functions
 
@@ -60,7 +58,7 @@ class PlurkifyHTMLParser(HTMLParser):
             self.write_buffer(FORMATTERS[tag])
 
     def handle_data(self, data):
-        if tag not in ('style', 'script'):
+        if not self.is_in_raw_tag():
             self.write_buffer(data)
 
     def handle_endtag(self, tag):
@@ -96,10 +94,13 @@ class PlurkifyHTMLParser(HTMLParser):
 
     # Utilities function
 
+    def is_in_raw_tag(self):
+        return 'script' in self.stack or 'style' in self.stack
+
     def write_buffer(self, text):
         if 'a' in self.stack:
             self.sub_buffer.write(text)
-        else
+        else:
             self.buffer.write(text)
 
     def is_valid_url(self, url):
@@ -110,11 +111,11 @@ class PlurkifyHTMLParser(HTMLParser):
 
     def close_tag(self, tag):
         # Append formatter postfix
-        if top in FORMATTERS:
-            self.buffer.write(FORMATTER)
+        if tag in FORMATTERS:
+            self.buffer.write(FORMATTERS[tag])
         elif tag == 'a':
             url = self.current_url
-            title = self.sub_buffer.getvalue().trim()
+            title = self.sub_buffer.getvalue().strip()
 
             if url and self.is_valid_url(url):
                 if title:
@@ -122,7 +123,7 @@ class PlurkifyHTMLParser(HTMLParser):
                 else:
                     self.buffer.write(url)  # URL only
             else:
-                self.write(title)   # Plain text
+                self.buffer.write(title)   # Plain text
 
             # Reset sub-buffer
             self.current_url = None
