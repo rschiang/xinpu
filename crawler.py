@@ -76,7 +76,7 @@ class FeedCrawler(threading.Thread):
                     if summary_tag:
                         summary = str(summary_tag['content'])
 
-        # Postprocessing
+        # Postprocessing summary
         summary = self.plurkifier.convert(summary)
 
         # Pass through content filter if needed
@@ -84,3 +84,5 @@ class FeedCrawler(threading.Thread):
             summary = re.sub(feed.options['content_filter'], '', summary)
 
         item['summary'] = summary.strip()
+
+        return item
