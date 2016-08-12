@@ -19,7 +19,7 @@
         {
             "name": "端傳媒",
             "url": "http://feeds.initium.news/theinitium",
-            "interval": 300,
+            "interval": 600,
             "options": {
                 "link": "follow",
                 "extract": ["image"]
@@ -27,10 +27,18 @@
         },
         {
             "name": "科技新報",
-            "url": "http://technews.tw/feed/",
-            "interval": 600,
+            "url": "http://technews.tw/category/internet/feed/",
+            "interval": 1200,
             "options": {
                 "extract": ["image", "description"]
+            }
+        },
+        {
+            "name": "報導者",
+            "url": "https://www.twreporter.org/a/rss2.xml",
+            "interval": 3600,
+            "options": {
+                "extract": ["image"]
             }
         },
         {
