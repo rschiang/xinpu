@@ -2,7 +2,7 @@
 from .crawler import FeedCrawler
 from .models import Config, Feed
 from .poster import ContentPoster
-import dateutil
+import dateutil.parser
 import json
 import logging
 import threading

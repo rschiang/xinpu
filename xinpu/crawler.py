@@ -3,7 +3,7 @@ from datetime import datetime
 from urllib.request import urlopen
 from urllib.parse import urlparse
 from .plurkify import PlurkifyHTMLParser
-import dateutil
+import dateutil.parser
 import feedparser
 import logging
 import re
@@ -24,8 +24,8 @@ class FeedCrawler(threading.Thread):
             # Iterate through feeds
             for feed in self.app.config.feeds:
                 if feed.needs_update():
-                    logging.info('Updating feed {}', feed.name)
-                    new_entries = fetch_feed(feed)
+                    logging.info('Updating feed %s', feed.name)
+                    new_entries = self.fetch_feed(feed)
                     entries += new_entries
 
             # After aggregating all feeds, sort them before post
@@ -50,6 +50,7 @@ class FeedCrawler(threading.Thread):
                 item = self.parse_entry(feed, entry)
                 item['date'] = published
                 entries.append(item)
+                logging.debug('Title %s', item.title)
 
         return entries
 
