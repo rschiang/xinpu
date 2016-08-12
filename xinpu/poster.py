@@ -19,8 +19,12 @@ class ContentPoster(threading.Thread):
             item = self.queue.get()
             content = self.app.config.format.format(**item).strip()
 
-            self.plurk.callAPI('/APP/Timeline/plurkAdd', {
+            result = self.plurk.callAPI('/APP/Timeline/plurkAdd', {
                 'qualifier': ':',
                 'content': content,
                 'lang': item.get('lang', self.app.config.lang),
             })
+
+            if not result:
+                logging.warn('Failed to post content %s (%s)', item['title'], item['site'])
+                logging.debug(self.plurk.error())
