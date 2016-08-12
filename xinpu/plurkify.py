@@ -28,6 +28,7 @@ class PlurkifyHTMLParser(HTMLParser):
     # Public functions
     def convert(self, text):
         self.feed(text)
+        self.close()
 
         # Close all remaining tags
         while self.stack:
