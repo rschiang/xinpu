@@ -42,7 +42,8 @@ class PlurkifyHTMLParser(HTMLParser):
 
     def reset(self):
         super().reset()
-        self.buffer.close()
+        if self.buffer:
+            self.buffer.close()
         self.buffer = StringIO()
 
     def getvalue(self):
