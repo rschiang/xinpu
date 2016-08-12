@@ -8,7 +8,7 @@ class ContentPoster(threading.Thread):
         self.app = app
         self.daemon = True
         self.queue = Queue()
-        self.api = PlurkAPI.fromfile('plurk.json')
+        self.plurk = PlurkAPI.fromfile('plurk.json')
 
     def run(self):
         while self.app.running():
@@ -18,7 +18,7 @@ class ContentPoster(threading.Thread):
             item = self.queue.get()
             content = self.app.config.format.format(**item).strip()
 
-            result = plurk.callAPI('/APP/Timeline/plurkAdd', {
+            self.plurk.callAPI('/APP/Timeline/plurkAdd', {
                 'qualifier': ':',
                 'content': content,
                 'lang': item.get('lang', self.app.config.lang),
