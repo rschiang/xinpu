@@ -1,5 +1,4 @@
--e git+https://github.com/i-kiwamu/python3-oauth2.git#egg=oauth2
--e git+https://github.com/elleryq/plurk-oauth.git#egg=plurk_oauth
+-e git+https://github.com/clsung/plurk-oauth.git#egg=plurk_oauth
 feedparser==5.2.1
-python-dateutil==2.4.2
-beautifulsoup4==4.4.1
+python-dateutil==2.5.3
+beautifulsoup4==4.5.1
