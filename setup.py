@@ -14,6 +14,7 @@ meta = {
       'author_email': 'ren.chiang@gmail.com',
       'license': 'BSD',
       'packages': ['xinpu'],
+      'scripts': ['bin/xinpu'],
       'install_requires': ['feedparser', 'python-dateutil', 'beautifulsoup4'],
       'dependency_links': ['git+https://github.com/clsung/plurk-oauth.git#egg=plurk_oauth'],
       'include_package_date': True,

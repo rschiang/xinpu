@@ -1,8 +1,8 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
-from plurkify import PlurkifyHTMLParser
 from urllib.request import urlopen
 from urllib.parse import urlparse
+from .plurkify import PlurkifyHTMLParser
 import dateutil
 import feedparser
 import logging
