@@ -12,7 +12,8 @@
             "options": {
                 "link": "follow",
                 "extract": ["image"],
-                "content_filter": "(^（中央社[^）]+）|\\[\\[[^\\]]+\\]\\].+)"
+                "content_filter": "(^（中央社[^）]+）|\\[\\[[^\\]]+\\]\\].+)",
+                "exclude_images": ["http://img5.cna.com.tw/www/images/pic_fb.jpg"]
             }
         },
         {

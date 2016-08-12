@@ -54,6 +54,7 @@ class FeedCrawler(threading.Thread):
 
     def parse_entry(self, feed, entry):
         # Read configutations
+        follow_link = (feed.options.get('link') == 'follow')
         extract_options = feed.options.get('extract', [])
 
         # Setup default values
@@ -66,26 +67,24 @@ class FeedCrawler(threading.Thread):
         }
 
         # Extract contents from site
-        if 'follow' in feed.options or extract_options:
+        if follow_link or extract_options:
             request = urlopen(entry.link)
 
             # Replace proxied feed url with real ones
-            item['url'] = urlparse(request.geturl()).geturl()  # Trim query strings
+            if follow_link:
+                url, _, qs = request.geturl().partition('?')
+                item['url'] = url
 
             if extract_options:
                 soup = BeautifulSoup(request, 'html.parser')
 
                 # Extract image from metadata if applicable
                 if 'image' in extract_options:
-                    image_tag = soup.find('meta', property='og:image')
-                    if image_tag:
-                        item['image'] = str(image_tag['content'])
+                    item['image'] = self.extract_image(feed, soup) or ''
 
                 # Read description from metadata if applicable
                 if 'description' in extract_options:
-                    summary_tag = soup.find('meta', property='og:description') or soup.find('meta', name='description')
-                    if summary_tag:
-                        summary = str(summary_tag['content'])
+                    summary = self.extract_summary(feed, soup) or summary
 
         # Postprocessing summary
         self.plurkifier.feed(summary)
@@ -100,3 +99,18 @@ class FeedCrawler(threading.Thread):
         item['summary'] = summary.strip()
 
         return item
+
+    def extract_image(self, feed, soup):
+        tag = soup.find('meta', property='og:image')
+        if not tag: return
+
+        url = str(tag['content'])
+        if 'exclude_images' in feed.options:
+            if url in feed.options['exclude_images']: return
+
+        return url
+
+    def extract_summary(self, feed, soup):
+        tag = soup.find('meta', property='og:description') or soup.find('meta', name='description')
+        if tag:
+            return str(tag['content'])

@@ -1,3 +1,4 @@
+import logging
 import threading
 from plurk_oauth import PlurkAPI
 from queue import Queue
