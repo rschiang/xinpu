@@ -1,7 +1,7 @@
 {
     "version": "1",
     "username": "sinvun",
-    "format": "【{site}】{url} ({title})\n{summary}",
+    "format": "【{site}】{url} ({title})\n{summary}\n{image}",
     "throttle": 60,
     "backtrack": 7200,
     "feeds": [
@@ -33,10 +33,10 @@
         },
         {
             "name": "花火",
-            "url": "http://ntustudents.org/sparks/?feed=rss2",
+            "url": "https://sparks.ntustudents.org/feed/",
             "interval": 43200,
             "options": {
-                "extract": ["link"]
+                "extract": ["image"]
             }
         },
         {

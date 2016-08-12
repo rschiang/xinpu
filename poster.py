@@ -15,7 +15,8 @@ class ContentPoster(threading.Thread):
                 continue
 
             item = self.queue.get()
-            content = self.app.config.format.format(**item)
+            content = self.app.config.format.format(**item).strip()
+
             result = plurk.callAPI('/APP/Timeline/plurkAdd', {
                 'qualifier': ':',
                 'content': content,

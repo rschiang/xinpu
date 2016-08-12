@@ -36,38 +36,51 @@ class FeedCrawler(threading.Thread):
         # Filter out new items
         entries = []
         for entry in news.entries:
-            item = self.parse_entry(feed, entry)
-            if item:
+            # See if the entry was processed before
+            published = dateutil.parser.parse(entry.published)
+            if published > feed.last_updated:
+                item = self.parse_entry(feed, entry)
+                item['date'] = published
                 entries.append(item)
 
         return entries
 
     def parse_entry(self, feed, entry):
-        # Skip the entry if already updated
-        published = dateutil.parser.parse(entry.published)
-        if published <= feed.last_updated:
-            return None
-
         item = {
             'site': feed.name,
             'title': entry.title,
             'url': entry.link,
-            'date': published,
+            'image': '',
         }
 
-        if 'description' not in extract_options:
-            summary = plurkifier.convert(entry.description)
+        # Extract default values
+        summary = entry.description
 
-            # Pass through content filter if needed
-            if 'content_filter' in feed.options:
-                summary = re.sub(feed.options['content_filter'], '', summary)
-
-            item['summary'] = summary.strip()
-
-        # TODO: Extract contents from site
+        # Extract contents from site
         if 'follow' in feed.options or extract_options:
             request = urlopen(entry.link)
-            link = urlparse(request.geturl()).geturl()  # Trim query strings
+
+            # Replace proxied feed url with real ones
+            item['url'] = urlparse(request.geturl()).geturl()  # Trim query strings
 
             if extract_options:
                 soup = BeautifulSoup(request)
+
+                if 'image' in extract_options:
+                    image_tag = soup.find('meta', property='og:image')
+                    if image_tag:
+                        item['image'] = str(image_tag['content'])
+
+                if 'description' in extract_options:
+                    summary_tag = soup.find('meta', property='og:description') or soup.find('meta', name='description')
+                    if summary_tag:
+                        summary = str(summary_tag['content'])
+
+        # Postprocessing
+        summary = self.plurkifier.convert(summary)
+
+        # Pass through content filter if needed
+        if 'content_filter' in feed.options:
+            summary = re.sub(feed.options['content_filter'], '', summary)
+
+        item['summary'] = summary.strip()
