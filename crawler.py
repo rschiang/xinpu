@@ -5,6 +5,7 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 import dateutil
 import feedparser
+import logging
 import re
 import threading
 
@@ -23,6 +24,7 @@ class FeedCrawler(threading.Thread):
             # Iterate through feeds
             for feed in self.app.config.feeds:
                 if feed.needs_update():
+                    logging.info('Updating feed {}', feed.name)
                     new_entries = fetch_feed(feed)
                     entries += new_entries
 
