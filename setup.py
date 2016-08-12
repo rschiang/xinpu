@@ -15,7 +15,7 @@ meta = {
       'license': 'BSD',
       'packages': ['xinpu'],
       'scripts': ['bin/xinpu'],
-      'install_requires': ['feedparser', 'python-dateutil', 'beautifulsoup4'],
+      'install_requires': ['feedparser', 'python-dateutil', 'beautifulsoup4', 'plurk_oauth'],
       'dependency_links': ['https://github.com/clsung/plurk-oauth.git#egg=plurk_oauth'],
       'include_package_data': True,
       'zip_safe': False,
