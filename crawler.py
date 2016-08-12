@@ -18,7 +18,10 @@ class FeedCrawler(threading.Thread):
     def run(self):
         while self.app.running():
             entries = []
-            for feed in config.feeds:
+            now = datetime.now()
+
+            # Iterate through feeds
+            for feed in self.app.config.feeds:
                 if feed.needs_update():
                     new_entries = fetch_feed(feed)
                     entries += new_entries
@@ -27,6 +30,9 @@ class FeedCrawler(threading.Thread):
             entries = sorted(entries, key=lambda i: i['date'])
             for item in entries:
                 self.app.post_item(item)
+
+            # Update last_updated
+            self.app.set_last_update(now)
 
     def fetch_feed(self, feed):
         # Fetch feed
