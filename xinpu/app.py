@@ -2,7 +2,7 @@
 from .crawler import FeedCrawler
 from .models import Config, Feed
 from .poster import ContentPoster
-import dateutil.parser
+from . import utils
 import json
 import logging
 import threading
@@ -38,7 +38,7 @@ class Application(object):
         try:
             with open('last_updated.txt', 'r') as f:
                 date_str = f.read().strip()
-                last_updated = dateutil.parser.parse(date_str)
+                last_updated = utils.parse_date(date_str)
                 return last_updated
         except:
             logging.exception('Error while parsing last_updated file')
