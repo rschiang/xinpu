@@ -13,7 +13,6 @@ class FeedCrawler(threading.Thread):
         super(FeedCrawler, self).__init__(name='crawler')
         self.app = app
         self.daemon = True
-        self.plurkifier = PlurkifyHTMLParser()
 
     def run(self):
         while self.app.running():
@@ -88,7 +87,7 @@ class FeedCrawler(threading.Thread):
                         summary = str(summary_tag['content'])
 
         # Postprocessing summary
-        summary = self.plurkifier.convert(summary)
+        summary = PlurkifyHTMLParser.convert(summary)
 
         # Pass through content filter if needed
         if 'content_filter' in feed.options:

@@ -26,22 +26,28 @@ class PlurkifyHTMLParser(HTMLParser):
         self.sub_buffer = StringIO()
 
     # Public functions
-    def convert(self, text):
-        self.feed(text)
-        self.close()
+    @staticmethod
+    def convert(text):
+        parser = PlurkifyHTMLParser()
+        parser.feed(text)
+        parser.close()
+        return parser.getvalue()
 
+    def close(self):
+        super().close()
         # Close all remaining tags
         while self.stack:
             top = self.stack.pop()
             self.close_tag(tag)
 
-        # Get value and reset buffer
-        result = self.buffer.getvalue()
+    def reset(self):
+        super().reset()
         self.buffer.close()
         self.buffer = StringIO()
 
-        # Post-process
-        return self.remove_spaces(result).strip()
+    def getvalue(self):
+        value = self.buffer.getvalue()
+        return PlurkifyHTMLParser.remove_spaces(value).strip()
 
     # Internal functions
 
