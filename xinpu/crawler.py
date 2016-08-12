@@ -94,9 +94,11 @@ class FeedCrawler(threading.Thread):
 
         # Pass through content filter if needed
         if 'content_filter' in feed.options:
-            summary = re.sub(feed.options['content_filter'], '', summary)
+            summary = re.sub(feed.options['content_filter'], '', summary).strip()
 
-        item['summary'] = summary.strip()
+        if len(summary) > 120:
+            summary = summary[:120].strip() + '…'
+        item['summary'] = summary
 
         return item
 
