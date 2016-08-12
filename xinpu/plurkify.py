@@ -20,10 +20,7 @@ FORMATTERS = {
 class PlurkifyHTMLParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.stack = []
-        self.buffer = StringIO()
-        self.current_url = None
-        self.sub_buffer = StringIO()
+        # reset() is called implicitly
 
     # Public functions
     @staticmethod
@@ -42,9 +39,10 @@ class PlurkifyHTMLParser(HTMLParser):
 
     def reset(self):
         super().reset()
-        if self.buffer:
-            self.buffer.close()
+        self.stack = []
         self.buffer = StringIO()
+        self.current_url = None
+        self.sub_buffer = StringIO()
 
     def getvalue(self):
         value = self.buffer.getvalue()
