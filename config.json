@@ -16,6 +16,15 @@
             }
         },
         {
+            "name": "端傳媒",
+            "url": "http://feeds.initium.news/theinitium",
+            "interval": 300,
+            "options": {
+                "link": "follow",
+                "extract": ["image"]
+            }
+        },
+        {
             "name": "科技新報",
             "url": "http://technews.tw/feed/",
             "interval": 600,
@@ -25,7 +34,7 @@
         },
         {
             "name": "NPOst",
-            "url": "http://npost.tw/feed",
+            "url": "http://npost.tw/archives/category/newest/news/feed",
             "interval": 14400,
             "options": {
                 "extract": ["image", "description"]
