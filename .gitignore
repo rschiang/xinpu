@@ -2,4 +2,6 @@
 env/
 __pycache__
 *.pyc
-plurk.json  # Prevent accidentally committing key
+
+# Prevent accidentally committing key
+plurk.json

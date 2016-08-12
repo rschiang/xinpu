@@ -1,5 +1,8 @@
+from bs4 import BeautifulSoup
 from datetime import datetime
 from plurkify import PlurkifyHTMLParser
+from urllib.request import urlopen
+from urllib.parse import urlparse
 import dateutil
 import feedparser
 import re
@@ -45,9 +48,13 @@ class FeedCrawler(threading.Thread):
 
                         item['summary'] = summary.strip()
 
-                        # TODO: Extract contents from site
+                    # TODO: Extract contents from site
                     if 'follow' in feed.options or extract_options:
-                        pass
+                        request = urlopen(entry.link)
+                        link = urlparse(request.geturl()).geturl()  # Trim query strings
+
+                        if extract_options:
+                            soup = BeautifulSoup(request)
 
                     entries.append(item)
 

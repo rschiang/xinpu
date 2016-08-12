@@ -2,3 +2,4 @@
 -e git+https://github.com/elleryq/plurk-oauth.git#egg=plurk_oauth
 feedparser==5.2.1
 python-dateutil==2.4.2
+beautifulsoup4==4.4.1
