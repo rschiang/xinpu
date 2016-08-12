@@ -23,12 +23,12 @@ class PlurkifyHTMLParser(HTMLParser):
         # reset() is called implicitly
 
     # Public functions
-    @staticmethod
-    def convert(text):
-        parser = PlurkifyHTMLParser()
-        parser.feed(text)
-        parser.close()
-        return parser.getvalue()
+    def reset(self):
+        super().reset()
+        self.stack = []
+        self.buffer = StringIO()
+        self.current_url = None
+        self.sub_buffer = StringIO()
 
     def close(self):
         super().close()
@@ -36,13 +36,6 @@ class PlurkifyHTMLParser(HTMLParser):
         while self.stack:
             top = self.stack.pop()
             self.close_tag(tag)
-
-    def reset(self):
-        super().reset()
-        self.stack = []
-        self.buffer = StringIO()
-        self.current_url = None
-        self.sub_buffer = StringIO()
 
     def getvalue(self):
         value = self.buffer.getvalue()
