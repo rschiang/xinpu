@@ -11,15 +11,15 @@ class Config(object):
         self.last_updated = kwargs.get('last_updated') or (utils.local_now() - timedelta(seconds=self.backtrack))
         self.feeds = []
         for feed in kwargs.get('feeds') or []:
-            self.feeds.append(Feed(self, **feed))
+            self.feeds.append(Feed(**feed))
 
 class Feed(object):
-    def __init__(self, config, **kwargs):
+    def __init__(self, **kwargs):
         self.name = kwargs.get('name')
         self.url = kwargs.get('url')
         self.interval = kwargs.get('interval', 0)
         self.options = kwargs.get('options', {})
-        self.config = config
+        self.last_updated = kwargs.get('last_updated') or (utils.local_now() - timedelta(seconds=self.interval))
 
     def needs_update(self):
-        return (utils.local_now() - self.config.last_updated).total_seconds() >= self.interval
+        return (utils.local_now() - self.last_updated).total_seconds() >= self.interval

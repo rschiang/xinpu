@@ -26,6 +26,7 @@ class FeedCrawler(threading.Thread):
                     logging.info('Updating feed %s', feed.name)
                     new_entries = self.fetch_feed(feed)
                     entries += new_entries
+                    feed.last_updated = now
 
             # After aggregating all feeds, sort them before post
             entries = sorted(entries, key=lambda i: i['date'])
@@ -33,7 +34,8 @@ class FeedCrawler(threading.Thread):
                 self.app.post_item(item)
 
             # Update last_updated
-            self.app.set_last_update(now)
+            self.app.config.last_updated = now
+            self.app.save_last_update()
 
     def fetch_feed(self, feed):
         # Fetch feed
