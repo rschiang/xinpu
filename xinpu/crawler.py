@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from datetime import timedelta
 from urllib.request import urlopen
 from urllib.parse import urlparse
 from .plurkify import PlurkifyHTMLParser
@@ -28,6 +29,9 @@ class FeedCrawler(threading.Thread):
                     if new_entries:
                         entries += new_entries  # Some feeds does not immediately reflect
                         feed.last_updated = now # new articles, update time lazily
+                    elif (now - feed.last_updated).total_seconds() > self.app.config.backtrack:
+                        # Entries over these periods would not be checked
+                        feed.last_updated += timedelta(seconds=self.app.config.backtrack)
 
             # After aggregating all feeds, sort them before post
             entries = sorted(entries, key=lambda i: i['date'])
