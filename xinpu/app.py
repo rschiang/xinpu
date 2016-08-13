@@ -29,12 +29,7 @@ class Application(object):
         self.poster.queue.put(item)
 
     def save_last_update(self):
-        entity = {
-            'last_updated': self.config.last_updated.isoformat(),
-            'feeds': { feed.name: feed.last_updated.isoformat() for feed in self.config.feeds }
-        }
-
-        # Write to external file
+        entity = { feed.name: feed.last_updated.isoformat() for feed in self.config.feeds }
         with open('last_updated.json', 'w') as f:
             json.dump(entity, f, ensure_ascii=False, indent='\t')
 
@@ -43,14 +38,10 @@ class Application(object):
         try:
             with open('last_updated.json', 'r') as f:
                 entity = json.load(f)
-
-            # Parse dates and stuff them to entity
-            config['last_updated'] = utils.parse_date(entity['last_updated'])
-            dates = { name: utils.parse_date(date_str) for name, date_str in entity['feeds'].items() }
             for feed in config['feeds']:
                 name = feed['name']
-                if name in dates:
-                    feed['last_updated'] = dates[name]
+                if name in entity:
+                    feed['last_updated'] = utils.parse_date(entity[name])
 
         except FileNotFoundError:
             logging.warning('last_updated file not present')

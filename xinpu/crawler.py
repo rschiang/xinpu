@@ -30,8 +30,10 @@ class FeedCrawler(threading.Thread):
                         entries += new_entries  # Some feeds does not immediately reflect
                         feed.last_updated = now # new articles, update time lazily
                     elif (now - feed.last_updated).total_seconds() > self.app.config.backtrack:
-                        # Entries over these periods would not be checked
-                        feed.last_updated += timedelta(seconds=self.app.config.backtrack)
+                        # Push forward
+                        feed.last_updated = now - timedelta(self.app.config.backtrack)
+                    # Marked the completion of this interval
+                    feed.last_checked = now
 
             # After aggregating all feeds, sort them before post
             entries = sorted(entries, key=lambda i: i['date'])
@@ -39,7 +41,6 @@ class FeedCrawler(threading.Thread):
                 self.app.post_item(item)
 
             # Update last_updated
-            self.app.config.last_updated = now
             self.app.save_last_update()
 
     def fetch_feed(self, feed):
