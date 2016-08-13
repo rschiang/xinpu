@@ -8,4 +8,4 @@ __pycache__
 
 # Prevent accidentally committing config
 plurk.json
-last_updated.txt
+last_updated.json

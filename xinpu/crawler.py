@@ -46,7 +46,7 @@ class FeedCrawler(threading.Thread):
         for entry in news.entries:
             # See if the entry was processed before
             published = utils.parse_date(entry.published)
-            if published > self.app.config.last_updated:
+            if published > feed.last_updated:
                 item = self.parse_entry(feed, entry)
                 item['date'] = published
                 entries.append(item)
@@ -71,23 +71,26 @@ class FeedCrawler(threading.Thread):
 
         # Extract contents from site
         if follow_link or extract_options:
-            request = urlopen(entry.link)
+            try:
+                request = urlopen(entry.link)
+            except:
+                logging.exception('Cannot connect to %s', entry.link)
+            else:
+                # Replace proxied feed url with real ones
+                if follow_link:
+                    url, _, qs = request.geturl().partition('?')
+                    item['url'] = url
 
-            # Replace proxied feed url with real ones
-            if follow_link:
-                url, _, qs = request.geturl().partition('?')
-                item['url'] = url
+                if extract_options:
+                    soup = BeautifulSoup(request, 'html.parser')
 
-            if extract_options:
-                soup = BeautifulSoup(request, 'html.parser')
+                    # Extract image from metadata if applicable
+                    if 'image' in extract_options:
+                        item['image'] = self.extract_image(feed, soup) or ''
 
-                # Extract image from metadata if applicable
-                if 'image' in extract_options:
-                    item['image'] = self.extract_image(feed, soup) or ''
-
-                # Read description from metadata if applicable
-                if 'description' in extract_options:
-                    summary = self.extract_summary(feed, soup) or summary
+                    # Read description from metadata if applicable
+                    if 'description' in extract_options:
+                        summary = self.extract_summary(feed, soup) or summary
 
         # Postprocessing summary
         self.plurkifier.feed(summary)
