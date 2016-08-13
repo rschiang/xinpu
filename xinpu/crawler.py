@@ -34,7 +34,7 @@ class FeedCrawler(threading.Thread):
                         feed.last_updated = now # new articles, update time lazily
                     elif (now - feed.last_updated).total_seconds() > self.app.config.backtrack:
                         # Push last_updated forward as entries before this time should be ignored
-                        feed.last_updated = now - timedelta(self.app.config.backtrack)
+                        feed.last_updated = now - timedelta(seconds=self.app.config.backtrack)
                     else: continue
 
                     # Update last_updated
