@@ -31,7 +31,7 @@ class Application(object):
     def save_last_update(self):
         entity = {
             'last_updated': self.config.last_updated,
-            'feeds': { feed.name, feed.last_updated.isoformat() for feed in self.config.feeds }
+            'feeds': { feed.name: feed.last_updated.isoformat() for feed in self.config.feeds }
         }
 
         # Write to external file
@@ -39,24 +39,24 @@ class Application(object):
             json.dump(entity, f, ensure_ascii=False, indent='\t')
 
     @staticmethod
-    def load_last_update():
+    def load_last_update(config):
         try:
             with open('last_updated.json', 'r') as f:
                 entity = json.load(f)
 
-            # Parse dates
-            last_updated = utils.parse_date(entity['last_updated'])
-            feeds = { name, utils.parse_date(date_str) for name, date_str in entity['feeds'] }
+            # Parse dates and stuff them to entity
+            config['last_updated'] = utils.parse_date(entity['last_updated'])
 
-            # Return dates
-            return last_updated, feeds
+            dates = { name: utils.parse_date(date_str) for name, date_str in entity['feeds'] }
+            for feed in entity['feeds']:
+                name = feed['name']
+                if name in dates:
+                    feed['last_updated'] = dates[name]
 
         except FileNotFoundError:
             logging.warning('last_updated file not present')
         except:
             logging.exception('Error while parsing last_updated file')
-
-        return None, None
 
     @staticmethod
     def initialize():
@@ -67,12 +67,6 @@ class Application(object):
             entity = json.load(f)
 
         # Try loading last update time from file
-        last_updated, feeds = Application.load_last_update()
-        if last_updated:
-            entity['last_updated'] = last_updated
-            for feed in entity['feeds']:
-                name = feed['name']
-                if name in feeds:
-                    feed['last_updated'] = feeds[name]
+        Application.load_last_update(entity)
 
         return Application(config=Config(**entity))
