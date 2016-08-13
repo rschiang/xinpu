@@ -10,7 +10,7 @@ class Config(object):
         self.backtrack = kwargs.get('backtrack', 0)
         self.feeds = []
         for feed in kwargs.get('feeds') or []:
-            self.feeds.append(Feed(config, **feed))
+            self.feeds.append(Feed(self, **feed))
 
 class Feed(object):
     def __init__(self, config, **kwargs):
