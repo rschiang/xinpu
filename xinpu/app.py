@@ -30,7 +30,7 @@ class Application(object):
 
     def save_last_update(self):
         entity = {
-            'last_updated': self.config.last_updated,
+            'last_updated': self.config.last_updated.isoformat(),
             'feeds': { feed.name: feed.last_updated.isoformat() for feed in self.config.feeds }
         }
 
