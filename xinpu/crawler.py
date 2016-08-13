@@ -60,10 +60,10 @@ class FeedCrawler(threading.Thread):
         extract_options = feed.options.get('extract', [])
 
         # Setup default values
+        title = entry.title
         summary = entry.description
         item = {
             'site': feed.name,
-            'title': entry.title,
             'url': entry.link,
             'image': '',
         }
@@ -98,8 +98,11 @@ class FeedCrawler(threading.Thread):
         if 'content_filter' in feed.options:
             summary = re.sub(feed.options['content_filter'], '', summary).strip()
 
-        if len(summary) > 120:
-            summary = summary[:120].strip() + '…'
+        # Truncate string if needed
+        if len(title) > 40:
+            title = title[:40].strip() + '…'
+        if len(summary) > 100:
+            summary = summary[:100].strip() + '…'
         item['summary'] = summary
 
         return item
