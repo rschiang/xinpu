@@ -29,6 +29,11 @@ Xinpu
     + `image_exclude`: 要排除的影像網址清單，用以去除新聞網站顯示之預設影像。
     + `image_selector`: 解析文章影像 `<img>` 所使用的選擇子，如未指定，則僅會搜尋 `<meta property="og:image">` 的值。
 
+授權
+----
+
+以 [BSD License](LICENSE.md) 釋出予公眾利用。
+
 ---
 
 ![Photo by Willie Chen on Flickr, CC BY-NC-ND 2.0](https://farm1.staticflickr.com/108/302535466_f650b10a42_b.jpg)
