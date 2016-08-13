@@ -60,10 +60,11 @@ class FeedCrawler(threading.Thread):
         extract_options = feed.options.get('extract', [])
 
         # Setup default values
-        title = entry.title
+        title = self.truncate_text(entry.title, 40)
         summary = entry.description
         item = {
             'site': feed.name,
+            'title': title,
             'url': entry.link,
             'image': '',
         }
@@ -99,13 +100,13 @@ class FeedCrawler(threading.Thread):
             summary = re.sub(feed.options['content_filter'], '', summary).strip()
 
         # Truncate string if needed
-        if len(title) > 40:
-            title = title[:40].strip() + '…'
-        if len(summary) > 100:
-            summary = summary[:100].strip() + '…'
-        item['summary'] = summary
-
+        item['summary'] = self.truncate_text(summary, 100)
         return item
+
+    def truncate_text(self, text, length):
+        if len(text) > length:
+            return text[:length-1] + '…'
+        return text
 
     def extract_image(self, feed, soup):
         tag = soup.find('meta', property='og:image')
