@@ -13,7 +13,7 @@
                 "link": "follow",
                 "extract": ["image"],
                 "content_filter": "(^（中央社[^）]+）|\\[\\[[^\\]]+\\]\\].+)",
-                "exclude_images": ["http://img5.cna.com.tw/www/images/pic_fb.jpg"]
+                "image_exclude": ["http://img5.cna.com.tw/www/images/pic_fb.jpg"]
             }
         },
         {
@@ -42,6 +42,16 @@
             }
         },
         {
+            "name": "焦點事件",
+            "url": "http://www.eventsinfocus.org/rss.xml",
+            "interval": 14400,
+            "options": {
+                "extract": ["image", "description"],
+                "image_selector": "#full img",
+                "content_filter": "(^\\d{4}/\\d{2}/\\d{2}.+?/news/\\d+\n|/news/\\d+\\s*\\(…閱讀全文.+?\\))"
+            }
+        },
+        {
             "name": "NPOst",
             "url": "http://npost.tw/archives/category/newest/news/feed",
             "interval": 14400,
@@ -54,7 +64,8 @@
             "url": "https://sparks.ntustudents.org/feed/",
             "interval": 43200,
             "options": {
-                "extract": ["image"]
+                "extract": ["image"],
+                "image_selector": "main article .wp-post-image"
             }
         },
         {

@@ -26,7 +26,8 @@ Xinpu
     + `link`: 設定為 `follow` 時，會自動解析並展開轉址過的新聞網址。
     + `extract`: 由頁面上的中繼資料擷取、而非仰賴 RSS 所提供的欄位陣列，支援 `image` 與 `description`。
     + `content_filter`: 要從新聞摘要中過濾的字串，以正規表達式表示。
-    + `exclude_images`: 要排除的影像清單。
+    + `image_exclude`: 要排除的影像網址清單，用以去除新聞網站顯示之預設影像。
+    + `image_selector`: 解析文章影像 `<img>` 所使用的選擇子，如未指定，則僅會搜尋 `<meta property="og:image">` 的值。
 
 ---
 

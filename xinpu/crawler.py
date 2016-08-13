@@ -112,12 +112,19 @@ class FeedCrawler(threading.Thread):
         return text
 
     def extract_image(self, feed, soup):
-        tag = soup.find('meta', property='og:image')
-        if not tag: return
+        url = None
 
-        url = str(tag['content'])
-        if 'exclude_images' in feed.options:
-            if url in feed.options['exclude_images']: return
+        if 'image_selector' in feed.options:
+            tag = soup.select_one(feed.options['image_selector'])
+            if tag: url = str(tag['src'])
+
+        if not url:
+            tag = soup.find('meta', property='og:image')
+            if tag: url = str(tag['content'])
+            else: return
+
+        if 'image_exclude' in feed.options:
+            if url in feed.options['image_exclude']: return
 
         return url
 
