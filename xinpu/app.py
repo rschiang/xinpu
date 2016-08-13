@@ -46,9 +46,8 @@ class Application(object):
 
             # Parse dates and stuff them to entity
             config['last_updated'] = utils.parse_date(entity['last_updated'])
-
             dates = { name: utils.parse_date(date_str) for name, date_str in entity['feeds'] }
-            for feed in entity['feeds']:
+            for feed in config['feeds']:
                 name = feed['name']
                 if name in dates:
                     feed['last_updated'] = dates[name]
