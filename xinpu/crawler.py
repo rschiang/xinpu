@@ -25,8 +25,9 @@ class FeedCrawler(threading.Thread):
                 if feed.needs_update():
                     logging.info('Updating feed %s', feed.name)
                     new_entries = self.fetch_feed(feed)
-                    entries += new_entries
-                    feed.last_updated = now
+                    if new_entries:
+                        entries += new_entries  # Some feeds does not immediately reflect
+                        feed.last_updated = now # new articles, update time lazily
 
             # After aggregating all feeds, sort them before post
             entries = sorted(entries, key=lambda i: i['date'])
