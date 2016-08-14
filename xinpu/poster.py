@@ -22,6 +22,7 @@ class ContentPoster(threading.Thread):
                 logging.warn('Duplicated entry %s (%s)', item['title'], item['site'])
                 logging.info('Cached date: %s, entry date: %s',
                              item['date'].isoformat(' '), self.cache[item['url']].isoformat(' '))
+                continue
             else:
                 self.append_to_cache(item['url'], item['date'])
 
