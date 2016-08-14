@@ -9,6 +9,7 @@ class ContentPoster(threading.Thread):
         self.app = app
         self.daemon = True
         self.queue = Queue()
+        self.cache = {}
         self.plurk = PlurkAPI.fromfile('plurk.json')
 
     def run(self):
@@ -17,8 +18,14 @@ class ContentPoster(threading.Thread):
                 continue
 
             item = self.queue.get()
-            content = self.app.config.format.format(**item).strip()
+            if item['url'] in self.cache:
+                logging.warn('Duplicated entry %s (%s)', item['title'], item['site'])
+                logging.info('Cached date: %s, entry date: %s',
+                             item['date'].isoformat(' '), self.cache[item['url']].isoformat(' '))
+            else:
+                self.append_to_cache(item['url'], item['date'])
 
+            content = self.app.config.format.format(**item).strip()
             result = self.plurk.callAPI('/APP/Timeline/plurkAdd', {
                 'qualifier': ':',
                 'content': content,
@@ -28,3 +35,9 @@ class ContentPoster(threading.Thread):
             if not result:
                 logging.warn('Failed to post content %s (%s)', item['title'], item['site'])
                 logging.debug(self.plurk.error())
+
+    def append_to_cache(self, url, date):
+        if len(self.cache > 200):
+            oldest = min(self.cache.keys(), key=lambda i: self.cache[i])
+            del self.cache[oldest]
+        self.cache[url] = date
