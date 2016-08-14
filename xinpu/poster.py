@@ -37,7 +37,7 @@ class ContentPoster(threading.Thread):
                 logging.debug(self.plurk.error())
 
     def append_to_cache(self, url, date):
-        if len(self.cache > 200):
+        if len(self.cache) > 200:
             oldest = min(self.cache.keys(), key=lambda i: self.cache[i])
             del self.cache[oldest]
         self.cache[url] = date
