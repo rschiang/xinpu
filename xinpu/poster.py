@@ -9,8 +9,13 @@ class ContentPoster(threading.Thread):
         self.app = app
         self.daemon = True
         self.queue = Queue()
-        self.cache = {}
         self.plurk = PlurkAPI.fromfile('plurk.json')
+        self.cache = []
+        try:
+            with open('cache.txt', 'r') as f:
+                self.cache = [line.strip() for line in f]
+        except FileNotFoundError:
+            logging.warning('No cache file present')
 
     def run(self):
         while self.app.running():
@@ -18,13 +23,10 @@ class ContentPoster(threading.Thread):
                 continue
 
             item = self.queue.get()
-            if item['url'] in self.cache:
+            url = item['url'].strip()
+            if url in self.cache:
                 logging.warn('Duplicated entry %s (%s)', item['title'], item['site'])
-                logging.info('Cached date: %s, entry date: %s',
-                             item['date'].isoformat(' '), self.cache[item['url']].isoformat(' '))
                 continue
-            else:
-                self.append_to_cache(item['url'], item['date'])
 
             content = self.app.config.format.format(**item).strip()
             result = self.plurk.callAPI('/APP/Timeline/plurkAdd', {
@@ -36,9 +38,10 @@ class ContentPoster(threading.Thread):
             if not result:
                 logging.warn('Failed to post content %s (%s)', item['title'], item['site'])
                 logging.debug(self.plurk.error())
-
-    def append_to_cache(self, url, date):
-        if len(self.cache) > 200:
-            oldest = min(self.cache.keys(), key=lambda i: self.cache[i])
-            del self.cache[oldest]
-        self.cache[url] = date
+            else:
+                self.cache.append(url)
+                try:
+                    with open('cache.txt', 'a') as f:
+                        f.write(url + '\n')
+                except:
+                    logging.exception('Error while writing cache %s', url)
