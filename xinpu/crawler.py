@@ -142,6 +142,6 @@ class FeedCrawler(threading.Thread):
         return url
 
     def extract_summary(self, feed, soup):
-        tag = soup.find('meta', property='og:description') or soup.find('meta', name='description')
+        tag = soup.find('meta', property='og:description') or soup.find('meta', attrs={'name': 'description'})
         if tag:
             return str(tag['content'])
