@@ -25,7 +25,11 @@ class FeedCrawler(threading.Thread):
             for feed in self.app.config.feeds:
                 if feed.needs_update():
                     logging.info('Updating feed %s', feed.name)
-                    new_entries = self.fetch_feed(feed)
+                    try:
+                        new_entries = self.fetch_feed(feed)
+                    except:
+                        logging.exception('Cannot connect to feed')
+                        continue
 
                     # Marked the completion of this interval
                     feed.last_checked = now
