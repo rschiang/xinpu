@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from bs4 import BeautifulSoup
 from datetime import timedelta
 from urllib.request import urlopen
@@ -150,3 +151,7 @@ class FeedCrawler(Application):
         tag = soup.find('meta', property='og:description') or soup.find('meta', attrs={'name': 'description'})
         if tag:
             return str(tag['content'])
+
+
+if __name__ == '__main__':
+    FeedCrawler().run()

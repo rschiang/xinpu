@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import logging
 from .app import Application
 from .models import Item
@@ -30,3 +31,7 @@ class ContentPoster(Application):
 
         item.posted = True
         item.save()
+
+
+if __name__ == '__main__':
+    ContentPoster().run()
