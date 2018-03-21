@@ -1,47 +1,32 @@
 import logging
-import threading
-from plurk_oauth import PlurkAPI
-from queue import Queue
+from .app import Application
+from .models import Item
 
-class ContentPoster(threading.Thread):
-    def __init__(self, app):
-        super(ContentPoster, self).__init__(name='poster')
-        self.app = app
-        self.daemon = True
-        self.queue = Queue()
-        self.plurk = PlurkAPI.fromfile('plurk.json')
-        self.cache = []
-        try:
-            with open('cache.txt', 'r') as f:
-                self.cache = [line.strip() for line in f]
-        except FileNotFoundError:
-            logging.warning('No cache file present')
+class ContentPoster(Application):
+    def __init__(self):
+        super().__init__(name='poster')
 
     def run(self):
-        while self.app.running():
-            if self.queue.empty():
-                continue
+        item = Item.select().where(Item.posted == False).order_by(Item.date).first()    # noqa: E712
+        if not item:
+            # There's nothing we could post now
+            return
 
-            item = self.queue.get()
-            url = item['url'].strip()
-            if url in self.cache:
-                logging.warn('Duplicated entry %s (%s)', item['title'], item['site'])
-                continue
-
-            content = self.app.config.format.format(**item).strip()
+        content = self.config.format.format(**item).strip()
+        if not self.drill:
             result = self.plurk.callAPI('/APP/Timeline/plurkAdd', {
                 'qualifier': ':',
                 'content': content,
-                'lang': item.get('lang', self.app.config.lang),
-            })
+                'lang': self.config.lang,
+                })
+        else:
+            logging.debug('[poster] post %s', content)
+            result = True
 
-            if not result:
-                logging.warn('Failed to post content %s (%s)', item['title'], item['site'])
-                logging.debug(self.plurk.error())
-            else:
-                self.cache.append(url)
-                try:
-                    with open('cache.txt', 'a') as f:
-                        f.write(url + '\n')
-                except:
-                    logging.exception('Error while writing cache %s', url)
+        if not result:
+            logging.warn('[poster] failed to post content <%s> %s', item.site, item.title)
+            logging.debug(self.plurk.error())
+            return
+
+        item.posted = True
+        item.save()

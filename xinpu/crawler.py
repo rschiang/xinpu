@@ -1,74 +1,75 @@
 from bs4 import BeautifulSoup
 from datetime import timedelta
 from urllib.request import urlopen
-from urllib.parse import urlparse
+from .app import Application
+from .models import Item
 from .plurkify import PlurkifyHTMLParser
 from . import utils
 import feedparser
 import logging
 import re
-import threading
 
-class FeedCrawler(threading.Thread):
-    def __init__(self, app):
-        super(FeedCrawler, self).__init__(name='crawler')
-        self.app = app
-        self.daemon = True
+class FeedCrawler(Application):
+    def __init__(self):
+        super().__init__('crawler')
         self.plurkifier = PlurkifyHTMLParser()
 
     def run(self):
-        while self.app.running():
-            entries = []
-            now = utils.local_now()
+        now = utils.local_now()
 
-            # Iterate through feeds
-            for feed in self.app.config.feeds:
-                if feed.needs_update():
-                    logging.info('Updating feed %s', feed.name)
-                    try:
-                        new_entries = self.fetch_feed(feed)
-                    except:
-                        logging.exception('Cannot connect to feed')
-                        continue
+        # Iterate through feeds
+        for feed in self.config.feeds:
+            if not feed.needs_update():
+                continue
 
-                    # Marked the completion of this interval
-                    feed.last_checked = now
-                    if new_entries:
-                        entries += new_entries  # Some feeds does not immediately reflect
-                        feed.last_updated = now # new articles, update time lazily
-                    elif (now - feed.last_updated).total_seconds() > self.app.config.backtrack:
-                        # Push last_updated forward as entries before this time should be ignored
-                        feed.last_updated = now - timedelta(seconds=self.app.config.backtrack)
-                    else: continue
+            logging.info('[crawler] updating feed %s', feed.name)
 
-                    # Update last_updated
-                    self.app.save_last_update()
+            try:
+                new_items = self.fetch_feed(feed)
+            except:
+                logging.exception('cannot connect to feed')
+                continue
 
-            # After aggregating all feeds, sort them before post
-            entries = sorted(entries, key=lambda i: i['date'])
-            for item in entries:
-                self.app.post_item(item)
-
+            # Marked the completion of this interval
+            feed.last_checked = now
+            if new_items:
+                # Save them into queue
+                Item.insert_many(new_items).execute()
+                # Some feeds does not immediately reflect new articles, update time lazily
+                feed.last_updated = now
+            else:
+                # Check if feed has stagnated over backtrack window
+                if (now - feed.last_updated).total_seconds() > self.config.backtrack:
+                    # Push last_updated forward as entries before this time should be ignored
+                    feed.last_updated = now - timedelta(seconds=self.config.backtrack)
 
     def fetch_feed(self, feed):
         # Fetch feed
         news = feedparser.parse(feed.url)
+        items = []
 
         # Filter out new items
-        entries = []
         for entry in news.entries:
             # See if the entry was processed before
             published = utils.parse_date(entry.published)
             if published > feed.last_updated:
+                # Check if URL existed before
+                if Item.select().where(Item.url == entry.link.strip()).exists():
+                    logging.warn('[crawler] duplicate entry %s', entry.link)
+                    continue
+
+                # Parse and extract its content
                 item = self.parse_entry(feed, entry)
                 item['date'] = published
-                entries.append(item)
-                logging.debug('Title %s', item['title'])
 
-        return entries
+                # Add to queue
+                logging.debug('[crawler] title %s', item['title'])
+                items.append(item)
+
+        return items
 
     def parse_entry(self, feed, entry):
-        # Read configutations
+        # Read feed configuration
         follow_link = (feed.options.get('link') == 'follow')
         extract_options = feed.options.get('extract', [])
 
@@ -78,9 +79,9 @@ class FeedCrawler(threading.Thread):
         item = {
             'site': feed.name,
             'title': title,
-            'url': entry.link,
+            'url': entry.link.strip(),
             'image': '',
-        }
+            }
 
         # Extract contents from site
         if follow_link or extract_options:
@@ -121,7 +122,7 @@ class FeedCrawler(threading.Thread):
 
     def truncate_text(self, text, length):
         if len(text) > length:
-            return text[:length-1] + '…'
+            return text[:length - 1] + '…'
         return text
 
     def extract_image(self, feed, soup):
@@ -129,15 +130,19 @@ class FeedCrawler(threading.Thread):
 
         if 'image_selector' in feed.options:
             tag = soup.select_one(feed.options['image_selector'])
-            if tag: url = str(tag['src'])
+            if tag:
+                url = str(tag['src'])
 
         if not url:
             tag = soup.find('meta', property='og:image')
-            if tag: url = str(tag['content'])
-            else: return
+            if tag:
+                url = str(tag['content'])
+            else:
+                return
 
         if 'image_exclude' in feed.options:
-            if url in feed.options['image_exclude']: return
+            if url in feed.options['image_exclude']:
+                return
 
         return url
 
