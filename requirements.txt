@@ -1,4 +1,4 @@
--e git+https://github.com/clsung/plurk-oauth.git#egg=plurk_oauth
+plurk-oauth==0.9.2
 feedparser==5.2.1
 python-dateutil==2.5.3
 beautifulsoup4==4.5.1
