@@ -23,7 +23,7 @@ class FeedCrawler(Application):
             if not feed.needs_update():
                 continue
 
-            logging.info('[crawler] updating feed %s', feed.name)
+            logging.info('updating feed %s', feed.name)
 
             try:
                 new_items = self.fetch_feed(feed)
@@ -56,7 +56,7 @@ class FeedCrawler(Application):
             if published > feed.last_updated:
                 # Check if URL existed before
                 if Item.select().where(Item.url == entry.link.strip()).exists():
-                    logging.warn('[crawler] duplicate entry %s', entry.link)
+                    logging.warn('duplicate entry %s', entry.link)
                     continue
 
                 # Parse and extract its content
@@ -64,7 +64,7 @@ class FeedCrawler(Application):
                 item['date'] = published
 
                 # Add to queue
-                logging.debug('[crawler] title %s', item['title'])
+                logging.debug('title %s', item['title'])
                 items.append(item)
 
         return items

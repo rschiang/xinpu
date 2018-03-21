@@ -21,11 +21,11 @@ class ContentPoster(Application):
                 'lang': self.config.lang,
                 })
         else:
-            logging.debug('[poster] post %s', content)
+            logging.debug('post %s', content)
             result = True
 
         if not result:
-            logging.warn('[poster] failed to post content <%s> %s', item.site, item.title)
+            logging.warn('failed to post content <%s> %s', item.site, item.title)
             logging.debug(self.plurk.error())
             return
 
