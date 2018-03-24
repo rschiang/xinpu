@@ -9,6 +9,7 @@ import sys
 API_KEY_PATH = os.environ.get('XINPU_API_KEY', 'plurk.json')
 CONFIG_FILE_PATH = os.environ.get('XINPU_CONFIG', 'config.json')
 DATABASE_PATH = os.environ.get('XINPU_DB', 'cache.db')
+LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
 IS_DRILL = os.environ.get('XINPU_DRILL')
 
 class Application(object):
@@ -16,7 +17,7 @@ class Application(object):
         self.name = name
 
         # Set up logging
-        logging.basicConfig(stream=sys.stdout, format='[%(asctime)s][%(module)s] %(levelname)s: %(message)s', level=logging.INFO)
+        logging.basicConfig(stream=sys.stdout, format='[%(asctime)s][%(module)s] %(levelname)s: %(message)s', level=LOGLEVEL)
         logging.info('%s starting up', self.name)
 
         # Set up database

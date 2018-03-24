@@ -1,7 +1,6 @@
 import peewee as p
 from datetime import timedelta
 from . import utils
-import logging
 
 # Generic class
 
@@ -74,6 +73,9 @@ class Item(BaseModel):
     summary = p.TextField()
     date = p.DateTimeField(default=utils.local_now)
     posted = p.BooleanField(default=False)
+
+    def to_dict(self):
+        return dict(site=self.site, title=self.title, url=self.url, image=self.image, summary=self.summary, date=self.date)
 
 class FeedSource(BaseModel):
     name = p.CharField(max_length=31)

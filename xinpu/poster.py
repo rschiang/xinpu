@@ -13,8 +13,8 @@ class ContentPoster(Application):
             # There's nothing we could post now
             return
 
-        content = self.config.format.format(**item).strip()
-        if not self.drill:
+        content = self.config.format.format(**item.to_dict()).strip()
+        if not self.is_drill:
             result = self.plurk.callAPI('/APP/Timeline/plurkAdd', {
                 'qualifier': ':',
                 'content': content,
