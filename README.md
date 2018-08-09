@@ -6,7 +6,7 @@ Xinpu
 安裝
 ----
 
-(1) 安裝套件。
+(1) 將套件拷貝至本機。
 
     git clone https://github.com/rschiang/xinpu.git && cd xinpu
     pip install .
@@ -28,6 +28,11 @@ Xinpu
     + `content_filter`: 要從新聞摘要中過濾的字串，以正規表達式表示。
     + `image_exclude`: 要排除的影像網址清單，用以去除新聞網站顯示之預設影像。
     + `image_selector`: 解析文章影像 `<img>` 所使用的選擇子，如未指定，則僅會搜尋 `<meta property="og:image">` 的值。
+
+(4) 透過 `crontab` 或是其他方式，將套件排入背景執行。
+
+    * * * * * python -m xinpu.crawler
+    * * * * * python -m xinpu.poster
 
 授權
 ----
