@@ -18,7 +18,7 @@ class Application(object):
 
         # Set up logging
         logging.basicConfig(stream=sys.stdout, format='[%(asctime)s][%(module)s] %(levelname)s: %(message)s', level=LOGLEVEL)
-        logging.info('%s starting up', self.name)
+        logging.debug('%s starting up', self.name)
 
         # Set up database
         models.db.init(DATABASE_PATH)
@@ -33,4 +33,4 @@ class Application(object):
         self.is_drill = bool(IS_DRILL)
 
     def __del__(self):
-        logging.info('%s shutting down', self.name)
+        logging.debug('%s shutting down', self.name)
