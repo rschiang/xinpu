@@ -39,7 +39,7 @@
             "interval": 14400,
             "options": {
                 "extract": ["image"],
-                "content_filter": "(\\s*【[^】]+】\\s*|\\s*(整理)?撰?文\\s*[｜/／\\|]\\s*|本文章授權條款為以下：.+|was originally published in .+)",
+                "content_filter": "(\\s*【[^】]+】\\s*|\\s*(整理)?撰?文\\s*[｜/／\\|]\\s*|本文章授權條款為以下：.+|was originally published in .+)"
             }
         },
         {
@@ -63,7 +63,7 @@
         {
             "name": "台大意識報",
             "url": "http://cpaper-blog.blogspot.com/feeds/posts/default/-/各刊文章目錄/?alt=rss",
-            "interval": "43200",
+            "interval": 43200,
             "options": {
                 "content_filter": "(\\d+翻頁版\\s*[:：]?\\S*|編輯的話|◎\\s*[^\\n]+|[-──]{2,})"
             }
