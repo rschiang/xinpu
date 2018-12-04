@@ -35,7 +35,7 @@ class PlurkifyHTMLParser(HTMLParser):
         # Close all remaining tags
         while self.stack:
             top = self.stack.pop()
-            self.close_tag(tag)
+            self.close_tag(top)
 
     def getvalue(self):
         value = self.buffer.getvalue()
